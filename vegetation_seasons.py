@@ -19,11 +19,11 @@ except ImportError:
 warnings.simplefilter('ignore', RankWarning)
 
 
-def folder_grafics_TEMP(input_folder, output_folder, n, summary_filename="all_ndvi.txt"):
+def folder_grafics_TEMP(input_folder, output_folder, n, summary_filename="all_temp.txt"):
     """Processes reference txt files with temperatures and returns the temp_db dictionary."""
     temp_db = {}
     if not os.path.exists(input_folder):
-        print(f"Folder {input_folder} not found. Skipping NDVI/temperatures reading.")
+        print(f"Folder {input_folder} not found. Skipping temperatures reading.")
         return temp_db
         
     if not os.path.exists(output_folder):
@@ -125,12 +125,14 @@ def extract_ndwi_features(input_folder, temp_db=None):
         df = pd.read_csv(file_path, names=['date', 'NDWI'], header=0)
         df = df.dropna(subset=['date'])
         
-        df['date'] = pd.to_datetime(df['date'], format='%Y,-%m-%d', errors='coerce')
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
         df = df.dropna(subset=['date']).set_index('date')
         
         if df.empty:
             continue
-            
+        
+        df = df.groupby(level = 0).mean()
+
         full_range = pd.date_range(start=df.index.min(), end=df.index.max(), freq='D')
         df = df.reindex(full_range)
         
@@ -194,7 +196,10 @@ def extract_ndwi_features(input_folder, temp_db=None):
         res_df = pd.concat(all_stations_features, ignore_index=True)
         res_df['last_angle_5'] = res_df['last_angle_5'].fillna(0.0)
         res_df['next_angle_5'] = res_df['next_angle_5'].fillna(0.0)
+        print (res_df)
         return res_df
+    else:
+        print ("no alf")
     return pd.DataFrame()
 
 
@@ -325,7 +330,7 @@ if __name__ == "__main__":
     smoothing_window = int(input("Enter smoothing window for Petrun temperatures (n): "))
     
     print("\n--- Step 1: Collecting and preparing reference database (training) ---")
-    temp_db_train = folder_grafics_TEMP(train_temp_dir, output_directory, smoothing_window, "petrun_all_ndvi.txt")
+    temp_db_train = folder_grafics_TEMP(train_temp_dir, output_directory, smoothing_window, "petrun_all_temp.txt")
     train_df = extract_ndwi_features(train_ndwi_dir, temp_db=temp_db_train)
     
     print("\n--- Step 2: Preparing new data (Naryan-Mar) ---")
