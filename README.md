@@ -22,6 +22,8 @@ In the test_ndwi_dir variable, specify the path to the folder containing the .cs
 
 The test file itself must be formatted strictly to contain only the date (Year-Month-Day) and the NDWI index, as shown below:
 
+<img width="285" height="574" alt="CSV format file" src="https://github.com/user-attachments/assets/165051d0-5698-4305-9fd8-a65402c991c9" />
+
 ![CSV Format]
 
 3. Setting Up the Output Directory
