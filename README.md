@@ -40,7 +40,7 @@ For each year processed, the program will output a graph showing the predicted t
 
 Along with the graphs, the program will generate 4 files in your output directory:
 
-all_ndvi (or petrun_all_ndvi): Represents the temperature trend recorded at the training station.
+all_temps (or petrun_all_temp): Represents the temperature trend recorded at the training station.
 
 ml_predicted_details: Contains the predicted daily temperature for each day, calculated based on the obtained NDWI index.
 
