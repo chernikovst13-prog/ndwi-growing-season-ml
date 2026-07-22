@@ -183,7 +183,6 @@ def extract_ndwi_features(input_folder, temp_db=None):
         df['Difference'] = df['NDWI'].diff().fillna(0)
         df['File_name'] = file_name
         
-        # We no longer need to mark "Is_transition" mathematically for training the classifier
         df['Is_transition'] = 0 
         
         all_stations_features.append(df[[
