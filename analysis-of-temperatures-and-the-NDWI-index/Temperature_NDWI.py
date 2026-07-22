@@ -25,7 +25,7 @@ def folder_grafics_NDVI(input_folder, output_folder, n):
             with open(file_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     s = line.strip().split()
-                    if not s or s[0] == "Индекс":
+                    if not s or s[0] == "Index":
                         continue
                     try:
                         station = s[0]
@@ -46,7 +46,7 @@ def folder_grafics_NDVI(input_folder, output_folder, n):
             full_answer = [station]
             total = len(temps)
            
-            # --- Сглаживание ---
+            # --- Smoothing ---
             averaged_temp = []
             for i in range(total):
                 startidx = max(0, i - n)
@@ -54,7 +54,7 @@ def folder_grafics_NDVI(input_folder, output_folder, n):
                 window = temps[startidx:endidx]
                 averaged_temp.append(sum(window) / len(window))
 
-            # --- Поиск фенофаз ---
+            # --- Phenophase search ---
             for j in range(1, total - 4):
                 if averaged_temp[j-1] <= 5 and averaged_temp[j] >= 5 and averaged_temp[j+4] >= 5:
                     full_answer.append(dates[j])
@@ -74,12 +74,12 @@ def folder_grafics_NDVI(input_folder, output_folder, n):
            
             summary_file.write(f"{filename}: {full_answer}\n")
            
-            # --- График ---
+            # --- Plot ---
             plt.figure(figsize=(12, 6))
-            plt.plot(dates, temps, alpha=0.3, label='Исходная темп.', color='red')
-            plt.plot(dates, averaged_temp, alpha=0.8, label=f'Сглаженная (n={n})', color='blue', linewidth=2)
-            plt.axhline(y=5, color='green', linestyle='--', linewidth=1.5, label='Порог 5°C')
-            plt.axhline(y=10, color='darkgreen', linestyle='--', linewidth=1.5, label='Порог 10°C')
+            plt.plot(dates, temps, alpha=0.3, label='Raw temp.', color='red')
+            plt.plot(dates, averaged_temp, alpha=0.8, label=f'Smoothed (n={n})', color='blue', linewidth=2)
+            plt.axhline(y=5, color='green', linestyle='--', linewidth=1.5, label='Threshold 5°C')
+            plt.axhline(y=10, color='darkgreen', linestyle='--', linewidth=1.5, label='Threshold 10°C')
 
             x_indx = np.arange(total)
             poly_coeficients = np.polyfit(x_indx, temps, deg=3)
@@ -87,9 +87,9 @@ def folder_grafics_NDVI(input_folder, output_folder, n):
             plt.plot(dates, polyfunction(x_indx), color='black', linestyle='-.', linewidth=2, label='trend')
            
             plt.xticks(dates[::30], rotation=45)
-            plt.title(f'NDVI: Анализ температурных трендов ({filename})')
-            plt.xlabel('Дата')
-            plt.ylabel('Температура (°C)')
+            plt.title(f'NDVI: Temperature trend analysis ({filename})')
+            plt.xlabel('Date')
+            plt.ylabel('Temperature (°C)')
             plt.grid(True, linestyle='--', alpha=0.6)
             plt.legend()
             plt.tight_layout()
@@ -181,7 +181,7 @@ def folder_grafics_NDWI(input_folder, output_folder, n):
             coef_lin = np.polyfit(x_slice, temps_slice, deg=1)
             y_lin = np.poly1d(coef_lin)(x_slice)
 
-            coef_poly3 = np.polyfit(x_slice, temps_slice, deg=3)
+            coef_poly3 = np.polyfit(x_slice, temps_slice, deg=2)
             y_poly = np.poly1d(coef_poly3)(x_slice)
 
             difference = y_lin - y_poly
@@ -197,15 +197,15 @@ def folder_grafics_NDWI(input_folder, output_folder, n):
             summary_file.write(f"{file_name}: {full_answer}\n")
 
             plt.figure(figsize=(13, 7))
-            plt.plot(dates, temps, alpha=0.4, label='Исходные данные', color='gray')
-            plt.plot(dates, trends_value_all, alpha=0.4, label='Общий тренд (deg=4)', color='cyan', linestyle=':')
+            plt.plot(dates, temps, alpha=0.4, label='Raw data', color='gray')
+            plt.plot(dates, trends_value_all, alpha=0.4, label='Overall trend (deg=4)', color='cyan', linestyle=':')
            
             if len(dates_slice) > 0:
-                plt.plot(dates_slice, y_lin, color='orange', linewidth=2.5, linestyle='--', label='Линейный тренд')
-                plt.plot(dates_slice, y_poly, color='purple', linewidth=2.5, label='Кубический тренд')
+                plt.plot(dates_slice, y_lin, color='orange', linewidth=2.5, linestyle='--', label='Linear trend')
+                plt.plot(dates_slice, y_poly, color='purple', linewidth=2.5, label='Cubic trend')
            
             plt.scatter([dates[start_slice], dates[end_slice]], [temps[start_slice], temps[end_slice]],
-                        color='black', s=120, zorder=5, label='Выявленные минимумы')
+                        color='black', s=120, zorder=5, label='Identified minimums')
            
             max_temp = max(temps) if temps else 1
             min_temp = min(temps) if temps else 0
@@ -215,7 +215,7 @@ def folder_grafics_NDWI(input_folder, output_folder, n):
                
                 plt.scatter(d_int, y_int, color='red', marker='X', s=150, zorder=6)
                 plt.annotate(
-                    f'Пересечение\n{d_int}',
+                    f'Intersection\n{d_int}',
                     xy=(d_int, y_int),
                     xytext=(d_int, y_int + ((max_temp - min_temp) * 0.1)),
                     arrowprops=dict(facecolor='red', shrink=0.08, width=1, headwidth=6, headlength=6),
@@ -223,9 +223,9 @@ def folder_grafics_NDWI(input_folder, output_folder, n):
                 )
            
             plt.xticks(dates[::30], rotation=45)
-            plt.title(f'NDWI: Анализ минимумов и трендов ({file_name})') 
-            plt.xlabel('Дата')
-            plt.ylabel('Значение')
+            plt.title(f'NDWI: Minimums and trends analysis ({file_name})') 
+            plt.xlabel('Date')
+            plt.ylabel('Value')
             plt.grid(True, linestyle='--', alpha=0.5)
             plt.legend(loc='upper right')
             plt.tight_layout()
@@ -239,14 +239,14 @@ def folder_grafics_NDWI(input_folder, output_folder, n):
 
 if __name__ == "__main__":
     #Path to the folder with temperature files
-    input_directory_v = r""
+    input_directory_v = r"C:\Users\Степа\Documents\data_w"
     #Path to the folder with NDWI index files
-    input_directory_w = r""
+    input_directory_w = r"C:\Users\Степа\Documents\data_w"
     #Path to the folder where you want to save obtained data 
-    output_directory = r"" 
+    output_directory = r"C:\Users\Степа\Documents\primchiki" 
    
-    smoothing_window = int(input("Введите окно усреднения (n): "))
+    smoothing_window = int(input("Enter the smoothing window (n): "))
    
     folder_grafics_NDVI(input_directory_v, output_directory, smoothing_window)
     folder_grafics_NDWI(input_directory_w, output_directory, smoothing_window)
-    print("all done")
+    print("All done")
